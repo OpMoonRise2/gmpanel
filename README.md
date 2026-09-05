@@ -56,57 +56,6 @@ They show in red, use a red **Execute (dangerous)** button, and require a second
 **CONFIRM <command>**. **Cancel**, changing the selected command, using a reference **Use** button or
 clearing the argument all disarm the confirmation.
 
-## Bot Control tab
-
-The window has two top-level tabs: **Commands** (the generic browser described above, unchanged) and
-**Bot Control**. Nothing in Bot Control is tied to a character name. The buttons are generated every
-frame from two sources:
-
-- the **server roster**: the reply to `!botparty roster`, one line of the form
-  `VanaBots roster: Bob(WAR,Lv5,party 6,alive) Barb(WHM,Lv5,solo,dead)`, parsed from the chat log
-  (`text_in`). The tab requests it when opened (at most every 30 s) and on **Refresh roster**;
-- the **client party list**: the other members of your own party, in slot order.
-
-Layout:
-
-| Section     | Content                                                                                   |
-|-------------|-------------------------------------------------------------------------------------------|
-| All bots    | `All: Free Reign / Offensive / Defensive / Passive` (`!botstance <stance>`), `Stance Status`, `Bots: Own Party` (`!botparty party`), `Bots: Split`, `Add All to Me` (`!botparty joinme all`), `Make Me Leader`, `Party Status`, `Bring All` (`!botlife bring all`), `Refresh roster` |
-| Your party  | one row per other party member: a bot gets its roster line and buttons; a non-bot is listed as "(not a bot)" with no buttons |
-| Other bots  | one row per roster bot that is not in your party                                          |
-
-Per-bot row (`<name>` is the bot's name in lower case):
-
-| Button  | Queued                          | Confirm |
-|---------|---------------------------------|---------|
-| Kill    | `!botlife kill <name>`          | yes     |
-| Respawn | `!botlife respawn <name>`       | no      |
-| Bring   | `!botlife bring <name>`         | no      |
-| Free / Off / Def / Pass | `!botstance <name> <stance>` | no |
-| Join Me | `!botparty joinme <name>`       | no      |
-| Lead    | `!botparty leader <name>`       | no      |
-
-Kill uses the same CONFIRM/Cancel step as other dangerous commands; the CONFIRM/Cancel pair appears under
-that bot's row. Action tables are cached by their command text, so an armed confirmation survives the
-redraw. Clicking any other button, or Cancel, disarms it.
-
-Bring uses `!botlife bring`, an in-zone move performed by the module. The stock `!bring` forces a rezone
-by default; headless characters cannot zone (the server now refuses that safely, but the module command is
-the intended path).
-
-`!botparty`, `!botstance` and `!botlife` are the Vana Bots module's operator commands
-(`modules/vana_bots/lua/*.lua` on the server); they accept any bot name or `all`, and the server rejects
-unknown names. The stance and lifecycle state lives on the map server, not in the addon. Not offered
-because no existing GM command covers them: spawning or despawning a bot.
-
-### Stub harness
-
-`gmpanel_harness.lua` (kept with the Vana Bots verification material) loads `gmpanel.lua` under fake
-Ashita/ImGui globals with a fake party list (player, one bot, one human) and simulates the roster reply and
-button clicks. It checks the roster request and its rate limit, the exact string of every per-bot and group
-button, that a human party member gets no buttons, the Kill CONFIRM/Cancel flow, and that every line is a
-module command. Run with `luajit gmpanel_harness.lua <folder containing gmpanel.lua and data.lua>`.
-
 ## In-game test sequence
 
 ```
